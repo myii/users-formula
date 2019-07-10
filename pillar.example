@@ -10,8 +10,23 @@ users-formula:
 groups:
   foo:
     state: present
-    gid: 500
+    gid: 1500
     system: False
+  badguys:
+    absent: True
+  niceguys:
+    gid: 4242
+    system: False
+    addusers: root
+    delusers: toor
+  ssl-cert:
+    system: True
+    members:
+      # *TODO*: run groups after all users created and then use `auser` and `buser` instead
+      - root
+      - sshd
+      # - bin
+      # - daemon
 
 users:
   ## Minimal required pillar values
@@ -19,7 +34,6 @@ users:
     fullname: A User
 
   ## Full list of pillar values
-  allow_gid_change: False
   buser:
     fullname: B User
     password: $6$w.............
@@ -38,7 +52,7 @@ users:
     workphone: "(555) 555-5555"
     homephone: "(555) 555-5551"
     manage_vimrc: False
-    allow_gid_change: True
+    allow_gid_change: False
     manage_bashrc: False
     manage_profile: False
     expire: 16426
@@ -64,46 +78,46 @@ users:
     remove_groups: False
     prime_group:
       name: primarygroup
-      gid: 500
+      gid: 1501
     groups:
       - users
     optional_groups:
       - some_groups_that_might
       - not_exist_on_all_minions
     ssh_key_type: rsa
-    # You can inline the private keys ...
-    ssh_keys:
-      privkey: PRIVATEKEY
-      pubkey: PUBLICKEY
-      # or you can provide path to key on Salt fileserver
-      privkey: salt://path_to_PRIVATEKEY
-      pubkey: salt://path_to_PUBLICKEY
-      # you can provide multiple keys, the keyname is taken as filename
-      # make sure your public keys suffix is .pub
-      foobar: PRIVATEKEY
-      foobar.pub: PUBLICKEY
-    # ... or you can pull them from a different pillar,
-    # for example one called "ssh_keys":
-    ssh_keys_pillar:
-      id_rsa: "ssh_keys"
-      another_key_pair: "ssh_keys"
-    ssh_auth:
-      - PUBLICKEY
-    ssh_auth.absent:
-      - PUBLICKEY_TO_BE_REMOVED
-    # Generates an authorized_keys file for the user
-    # with the given keys
-    ssh_auth_file:
-      - PUBLICKEY
-    # ... or you can pull them from a different pillar similar to ssh_keys_pillar
-    ssh_auth_pillar:
-      id_rsa: "ssh_keys"
-    # If you prefer to keep public keys as files rather
-    # than inline in pillar, this works.
-    ssh_auth_sources:
-      - salt://keys/buser.id_rsa.pub
-    ssh_auth_sources.absent:
-      - salt://keys/deleteduser.id_rsa.pub # PUBLICKEY_FILE_TO_BE_REMOVED
+    # # You can inline the private keys ...
+    # ssh_keys:
+    #   privkey: PRIVATEKEY
+    #   pubkey: PUBLICKEY
+    #   # or you can provide path to key on Salt fileserver
+    #   # privkey: salt://path_to_PRIVATEKEY
+    #   # pubkey: salt://path_to_PUBLICKEY
+    #   # you can provide multiple keys, the keyname is taken as filename
+    #   # make sure your public keys suffix is .pub
+    #   foobar: PRIVATEKEY
+    #   foobar.pub: PUBLICKEY
+    # # ... or you can pull them from a different pillar,
+    # # for example one called "ssh_keys":
+    # ssh_keys_pillar:
+    #   id_rsa: "ssh_keys"
+    #   another_key_pair: "ssh_keys"
+    # ssh_auth:
+    #   - PUBLICKEY
+    # ssh_auth.absent:
+    #   - PUBLICKEY_TO_BE_REMOVED
+    # # Generates an authorized_keys file for the user
+    # # with the given keys
+    # ssh_auth_file:
+    #   - PUBLICKEY
+    # # ... or you can pull them from a different pillar similar to ssh_keys_pillar
+    # ssh_auth_pillar:
+    #   id_rsa: "ssh_keys"
+    # # If you prefer to keep public keys as files rather
+    # # than inline in pillar, this works.
+    # ssh_auth_sources:
+    #   - salt://keys/buser.id_rsa.pub
+    # ssh_auth_sources.absent:
+    #   - salt://keys/deleteduser.id_rsa.pub # PUBLICKEY_FILE_TO_BE_REMOVED
     # Manage the ~/.ssh/config file
     ssh_known_hosts:
       importanthost:
@@ -141,7 +155,7 @@ users:
 
     google_2fa: True
     google_auth:
-      ssh: |
+      sshd: |
         SOMEGAUTHHASHVAL
         " RESETTING_TIME_SKEW 46956472+2 46991595-2
         " RATE_LIMIT 3 30 1415800560
@@ -161,8 +175,8 @@ users:
       # 'source' allows you to define an arbitrary directory to sync, useful to use for default files.
       # should be a salt fileserver path either with or without 'salt://'
       # if not present, it defaults to 'salt://users/files/user/<username>
-      source: users/files/default
-      template: jinja
+      source: users/files
+      # template: jinja
       # You can specify octal mode for files and symlinks that will be copied. Since version 2016.11.0
       # it's possible to use 'keep' for file_mode, to preserve file original mode, thus you can save
       # execution bit for example.
@@ -182,16 +196,3 @@ absent_users:
   - donald
   - bad_guy
 
-groups:
-  badguys:
-    absent: True
-  niceguys:
-    gid: 4242
-    system: False
-    addusers: root
-    delusers: toor
-  ssl-cert:
-    system: True
-    members:
-    - www-data
-    - openldap

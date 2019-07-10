@@ -144,7 +144,8 @@ users_{{ name }}_user:
     {% elif 'prime_group' in user and 'name' in user['prime_group'] %}
     - gid: {{ user['prime_group']['name'] }}
     {% else -%}
-    - gid_from_name: True
+    {#-   `gid_from_name` is only available up to 2019.2.X #}
+    - gid: {{ name }}
     {% endif -%}
     {% if 'fullname' in user %}
     - fullname: {{ user['fullname'] }}
@@ -506,6 +507,7 @@ users_{{ users.sudoers_dir }}/{{ sudoers_d_filename }}:
     - name: {{ users.sudoers_dir }}/{{ sudoers_d_filename }}
 {% endif %}
 
+{%- if not grains['os_family'] in ['RedHat', 'Suse'] %}
 {%- if 'google_auth' in user %}
 {%- for svc in user['google_auth'] %}
 users_googleauth-{{ svc }}-{{ name }}:
@@ -519,6 +521,7 @@ users_googleauth-{{ svc }}-{{ name }}:
     - require:
       - pkg: users_googleauth-package
 {%- endfor %}
+{%- endif %}
 {%- endif %}
 
 # this doesn't work (Salt bug), therefore need to run state.apply twice
