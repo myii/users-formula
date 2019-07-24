@@ -144,7 +144,6 @@ users_{{ name }}_user:
     {% elif 'prime_group' in user and 'name' in user['prime_group'] %}
     - gid: {{ user['prime_group']['name'] }}
     {% else -%}
-    {#-   `gid_from_name` is only available up to 2019.2.X #}
     - gid: {{ name }}
     {% endif -%}
     {% if 'fullname' in user %}
