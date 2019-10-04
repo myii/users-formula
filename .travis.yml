@@ -3,7 +3,7 @@
 ---
 dist: bionic
 stages:
-  - test
+  # - test
   - lint
   - name: release
     if: branch = master AND type != pull_request
@@ -59,14 +59,17 @@ jobs:
       node_js: lts/*
       before_install: skip
       script:
-        # Install and run `yamllint`
-        # Need at least `v1.17.0` for the `yaml-files` setting
-        - pip install --user yamllint>=1.17.0
-        - yamllint -s .
-        # Install and run `commitlint`
-        - npm install @commitlint/config-conventional -D
-        - npm install @commitlint/travis-cli -D
-        - commitlint-travis
+        # # Install and run `yamllint`
+        # # Need at least `v1.17.0` for the `yaml-files` setting
+        # - pip install --user yamllint>=1.17.0
+        # - yamllint -s .
+        # Install and run `salt-lint`
+        - pip install --user salt-lint
+        - git ls-files | grep '\.sls$' | xargs -I {} salt-lint {}
+        # # Install and run `commitlint`
+        # - npm install @commitlint/config-conventional -D
+        # - npm install @commitlint/travis-cli -D
+        # - commitlint-travis
     # Define the release stage that runs `semantic-release`
     - stage: release
       language: node_js
