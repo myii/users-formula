@@ -37,23 +37,36 @@ validate_users_group_present_{{ group }}_{{ section }}:
 {%-     endfor %}
 
 {%-     for section in ['members'] %}
-{%-       for member in (setting.get('addusers', []) + setting.get('members', [])) %}
-validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_present:
+{%-       for status, options in {
+              'present': {
+                  'assertion': 'assertIn',
+                  'gp_settings': [
+                      'addusers',
+                      'members',
+                  ],
+              },
+              'absent': {
+                  'assertion': 'assertNotIn',
+                  'gp_settings': [
+                      'delusers',
+                  ],
+              },
+          }.items() %}
+{%-         set members = [] %} 
+{%-         for gp_setting in options.gp_settings %} 
+{%-           for member in setting.get(gp_setting, []) %} 
+{%-             do members.append(member) %} 
+{%-           endfor %} 
+{%-         endfor %} 
+{%-         for member in members %} 
+validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_{{ status }}:
   module_and_function: group.info
   args:
     - '{{ group }}'
-  assertion: assertIn
+  assertion: {{ options.assertion }}
   assertion_section: '{{ section }}'
   expected-return: '{{ member }}'
-{%-       endfor %}
-{%-       for member in setting.get('delusers', []) %}
-validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_absent:
-  module_and_function: group.info
-  args:
-    - '{{ group }}'
-  assertion: assertNotIn
-  assertion_section: '{{ section }}'
-  expected-return: '{{ member }}'
+{%-         endfor %}
 {%-       endfor %}
 {%-     endfor %}
 
