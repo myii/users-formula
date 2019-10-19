@@ -1,26 +1,29 @@
-# vim: sts=2 ts=2 sw=2 et ai
-{% from "users/map.jinja" import users with context %}
-{% set used_sudo = [] %}
-{% set used_googleauth = [] %}
-{% set used_user_files = [] %}
-{% set used_polkit = [] %}
+# -*- coding: utf-8 -*-
+# vim: ft=sls
 
-{% for group, setting in salt['pillar.get']('groups', {}).items() %}
-{%   if setting.absent is defined and setting.absent or setting.get('state', "present") == 'absent' %}
+{%- from "users/map.jinja" import users with context %}
+
+{%- set used_sudo = [] %}
+{%- set used_googleauth = [] %}
+{%- set used_user_files = [] %}
+{%- set used_polkit = [] %}
+
+{%- for group, setting in salt['pillar.get']('groups', {}).items() %}
+{%-   if setting.absent is defined and setting.absent or setting.get('state', "present") == 'absent' %}
 users_group_absent_{{ group }}:
   group.absent:
     - name: {{ group }}
-{% else %}
+{%-   else %}
 users_group_present_{{ group }}:
   group.present:
     - name: {{ group }}
-    - gid: {{ setting.get('gid', "null") }}
-    - system: {{ setting.get('system',"False") }}
+    - gid: {{ setting.get('gid', '') }}
+    - system: {{ setting.get('system', False) }}
     - members: {{ setting.get('members')|json }}
     - addusers: {{ setting.get('addusers')|json }}
     - delusers: {{ setting.get('delusers')|json }}
-{% endif %}
-{% endfor %}
+{%-   endif %}
+{%- endfor %}
 
 {%- for name, user in pillar.get('users', {}).items()
         if user.absent is not defined or not user.absent %}
