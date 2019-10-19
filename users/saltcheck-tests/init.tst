@@ -20,22 +20,31 @@ validate_users_group_absent_{{ group }}:
 
 {%-   else %}
 
-{%-     for section in ['gid'] %}
-{%-       set assertion = 'assertEqual' %}
-{%-       set expected = setting.get(section, '') %}
-{%-       if not expected %}
-{%-         set assertion = 'assertGreater' if setting.get('system', False) else 'assertLessEqual' %}
-{%-         set expected = 1000 %}
-{%-       endif %}
+{#-     Check `gid` for each group that is present #}
+{%-     set section = 'gid' %}
+{%-     set conf = {
+            'default': {
+                'assertion': 'assertEqual',
+                'expected': setting.get(section, ''),
+            },
+            'alt': {
+                'assertion': 'assertGreater' if setting.get('system', False) else 'assertLessEqual',
+                'expected': 1000,
+            },
+          } %}
+{%-     set use_conf = conf.default %}
+{%-     if not use_conf.expected %}
+{%-       set use_conf = conf.alt %}
+{%-     endif %}
 validate_users_group_present_{{ group }}_{{ section }}:
   module_and_function: group.info
   args:
     - '{{ group }}'
-  assertion: {{ assertion }}
+  assertion: {{ use_conf.assertion }}
   assertion_section: '{{ section }}'
-  expected-return: '{{ expected }}'
-{%-     endfor %}
+  expected-return: '{{ use_conf.expected }}'
 
+{#-     Check `members` present & absent for each group that is present #}
 {%-     for section in ['members'] %}
 {%-       for status, options in {
               'present': {
