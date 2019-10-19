@@ -45,29 +45,30 @@ validate_users_group_present_{{ group }}_{{ section }}:
   expected-return: '{{ use_conf.expected }}'
 
 {#-     Check `members` present & absent for each group that is present #}
-{%-     for section in ['members'] %}
-{%-       for status, options in {
-              'present': {
-                  'assertion': 'assertIn',
-                  'gp_settings': [
-                      'addusers',
-                      'members',
-                  ],
-              },
-              'absent': {
-                  'assertion': 'assertNotIn',
-                  'gp_settings': [
-                      'delusers',
-                  ],
-              },
-          }.items() %}
-{%-         set members = [] %} 
-{%-         for gp_setting in options.gp_settings %} 
-{%-           for member in setting.get(gp_setting, []) %} 
-{%-             do members.append(member) %} 
-{%-           endfor %} 
+{%-     set section = 'members' %}
+{%-     set conf = {
+            'present': {
+                'assertion': 'assertIn',
+                'gp_settings': [
+                    'addusers',
+                    'members',
+                ],
+            },
+            'absent': {
+                'assertion': 'assertNotIn',
+                'gp_settings': [
+                    'delusers',
+                ],
+            },
+        } %}
+{%-     for status, options in conf.items() %}
+{%-       set members = [] %} 
+{%-       for gp_setting in options.gp_settings %} 
+{%-         for member in setting.get(gp_setting, []) %} 
+{%-           do members.append(member) %} 
 {%-         endfor %} 
-{%-         for member in members %} 
+{%-       endfor %} 
+{%-       for member in members %} 
 validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_{{ status }}:
   module_and_function: group.info
   args:
@@ -75,7 +76,6 @@ validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_{{ status }}
   assertion: {{ options.assertion }}
   assertion_section: '{{ section }}'
   expected-return: '{{ member }}'
-{%-         endfor %}
 {%-       endfor %}
 {%-     endfor %}
 
