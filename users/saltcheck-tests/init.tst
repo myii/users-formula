@@ -62,13 +62,13 @@ validate_users_group_present_{{ group }}_{{ section }}:
             },
         } %}
 {%-     for status, options in conf.items() %}
-{%-       set members = [] %} 
-{%-       for gp_setting in options.gp_settings %} 
-{%-         for member in setting.get(gp_setting, []) %} 
-{%-           do members.append(member) %} 
-{%-         endfor %} 
-{%-       endfor %} 
-{%-       for member in members %} 
+{%-       set members = [] %}
+{%-       for gp_setting in options.gp_settings %}
+{%-         for member in setting.get(gp_setting, []) %}
+{%-           do members.append(member) %}
+{%-         endfor %}
+{%-       endfor %}
+{%-       for member in members %}
 validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_{{ status }}:
   module_and_function: group.info
   args:
@@ -141,6 +141,26 @@ validate_users_{{ name }}_user_prereq:
   args:
     - '{{ salt['file.dirname'](home) }}'
   assertion: {{ use_conf.assertion }}
+
+validate_users_{{ name }}_user_file_directory_exists:
+  module_and_function: file.directory_exists
+  args:
+    - '{{ home }}'
+  assertion: {{ use_conf.assertion }}
+
+{%-       set conf = {
+              'user': user.get('homedir_owner', name),
+              'group': user.get('homedir_group', user_group),
+              'mode': user.get('user_dir_mode', '0750'),
+          } %}
+{%-       for conf_key, conf_val in conf.items() %}
+validate_users_{{ name }}_user_file_directory_{{ conf_key }}:
+  module_and_function: file.get_{{ conf_key }}
+  args:
+    - '{{ home }}'
+  assertion: assertEqual
+  expected-return: '{{ conf_val }}'
+{%-       endfor %}
 {%-     endif %}
 
 

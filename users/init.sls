@@ -96,7 +96,7 @@ users_{{ name }}_user_prereq:
 {%-     endif %}
 
 users_{{ name }}_user:
-  {% if createhome -%}
+  {%- if createhome %}
   file.directory:
     - name: {{ home }}
     - user: {{ user.get('homedir_owner', name) }}

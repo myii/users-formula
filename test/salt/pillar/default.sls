@@ -49,7 +49,7 @@ users:
     home: /custom/buser
     homedir_owner: buser
     homedir_group: primarygroup
-    user_dir_mode: 750
+    user_dir_mode: '0750'
     createhome: true
     roomnumber: "A-1"
     workphone: "(555) 555-5555"
@@ -187,8 +187,8 @@ users:
       file_mode: keep
       # You can specify octal mode for directories as well.
       # This won't work on Windows minions
-      # dir_mode: 775
-      sym_mode: 640
+      # dir_mode: '0775'
+      sym_mode: '0640'
       exclude_pat: "*.gitignore"
 
   ## Absent user
