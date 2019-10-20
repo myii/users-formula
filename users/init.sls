@@ -85,15 +85,15 @@ users_{{ name }}_{{ group }}_group:
     {%-   endif %}
 {%-     endfor %}
 
-{# in case home subfolder doesn't exist, create it before the user exists #}
-{% if createhome -%}
+{#- In case home subfolder doesn't exist, create it before the user exists #}
+{%-     if createhome %}
 users_{{ name }}_user_prereq:
   file.directory:
     - name: {{ salt['file.dirname'](home) }}
     - makedirs: True
     - prereq:
       - user: users_{{ name }}_user
-{%- endif %}
+{%-     endif %}
 
 users_{{ name }}_user:
   {% if createhome -%}

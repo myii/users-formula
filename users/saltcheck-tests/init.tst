@@ -130,5 +130,19 @@ validate_users_{{ name }}_{{ group }}_group:
   assertion: {{ use_conf.assertion }}
   expected-return: '{{ use_conf.expected }}'
 {%-     endfor %}
+
+{#- In case home subfolder doesn't exist, create it before the user exists #}
+{%-     if createhome %}
+{%-       set use_conf = {
+              'assertion': 'assertTrue',
+          } %}
+validate_users_{{ name }}_user_prereq:
+  module_and_function: file.directory_exists
+  args:
+    - '{{ salt['file.dirname'](home) }}'
+  assertion: {{ use_conf.assertion }}
+{%-     endif %}
+
+
 {%-   endif %}
 {%- endfor %}
