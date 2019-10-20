@@ -31,7 +31,7 @@ validate_users_group_absent_{{ group }}:
                 'assertion': 'assertGreater' if setting.get('system', False) else 'assertLessEqual',
                 'expected': 1000,
             },
-          } %}
+        } %}
 {%-     set use_conf = conf.default %}
 {%-     if not use_conf.expected %}
 {%-       set use_conf = conf.alt %}
@@ -79,5 +79,56 @@ validate_users_group_present_{{ group }}_{{ section }}_{{ member }}_{{ status }}
 {%-       endfor %}
 {%-     endfor %}
 
+{%-   endif %}
+{%- endfor %}
+
+{#- ... #}
+{%- for name, user in pillar.get('users', {}).items() if user.absent is not defined or not user.absent %}
+{%-   if user == None %}
+{%-     set user = {} %}
+{%-   endif %}
+{%-   if 'sudoonly' in user and user['sudoonly'] %}
+{%-     do user.update({'sudouser': True}) %}
+{%-   endif %}
+{%-   if 'sudouser' in user and user['sudouser'] %}
+{%-     do used_sudo.append(1) %}
+{%-   endif %}
+{%-   if 'google_auth' in user %}
+{%-     do used_googleauth.append(1) %}
+{%-   endif %}
+{%-   if salt['pillar.get']('users:' ~ name ~ ':user_files:enabled', False) %}
+{%-     do used_user_files.append(1) %}
+{%-   endif %}
+{%-   if user.get('polkitadmin', False) == True %}
+{%-     do used_polkit.append(1)  %}
+{%-   endif %}
+{%- endfor %}
+
+{%- for name, user in pillar.get('users', {}).items() if user.absent is not defined or not user.absent %}
+{%-   if user == None %}
+{%-     set user = {} %}
+{%-   endif %}
+{%-   set current = salt.user.info(name) %}
+{%-   set home = user.get('home', current.get('home', "/home/%s" % name)) %}
+{%-   set createhome = user.get('createhome', users.get('createhome')) %}
+{%-   if 'prime_group' in user and 'name' in user['prime_group'] %}
+{%-     set user_group = user.prime_group.name %}
+{%-   else %}
+{%-     set user_group = name %}
+{%-   endif %}
+
+{%-   if not ('sudoonly' in user and user['sudoonly']) %}
+{%-     for group in user.get('groups', []) %}
+{%-       set use_conf = {
+              'assertion': 'assertIn',
+              'expected': group,
+          } %}
+validate_users_{{ name }}_{{ group }}_group:
+  module_and_function: user.list_groups
+  args:
+    - '{{ name }}'
+  assertion: {{ use_conf.assertion }}
+  expected-return: '{{ use_conf.expected }}'
+{%-     endfor %}
 {%-   endif %}
 {%- endfor %}
