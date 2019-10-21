@@ -46,7 +46,7 @@ validate_users_group_present_{{ group }}_{{ section }}:
 
 {#-     Check `members` present & absent for each group that is present #}
 {%-     set section = 'members' %}
-{%-     set conf = {
+{%-     set use_conf = {
             'present': {
                 'assertion': 'assertIn',
                 'gp_settings': [
@@ -61,7 +61,7 @@ validate_users_group_present_{{ group }}_{{ section }}:
                 ],
             },
         } %}
-{%-     for status, options in conf.items() %}
+{%-     for status, options in use_conf.items() %}
 {%-       set members = [] %}
 {%-       for gp_setting in options.gp_settings %}
 {%-         for member in setting.get(gp_setting, []) %}
@@ -148,12 +148,12 @@ validate_users_{{ name }}_user_file_directory_exists:
     - '{{ home }}'
   assertion: {{ use_conf.assertion }}
 
-{%-       set conf = {
+{%-       set use_conf = {
               'user': user.get('homedir_owner', name),
               'group': user.get('homedir_group', user_group),
               'mode': user.get('user_dir_mode', '0750'),
           } %}
-{%-       for conf_key, conf_val in conf.items() %}
+{%-       for conf_key, conf_val in use_conf.items() %}
 validate_users_{{ name }}_user_file_directory_{{ conf_key }}:
   module_and_function: file.get_{{ conf_key }}
   args:
@@ -162,6 +162,14 @@ validate_users_{{ name }}_user_file_directory_{{ conf_key }}:
   expected-return: '{{ conf_val }}'
 {%-       endfor %}
 {%-     endif %}
+
+validate_users_{{ name }}_user_file_directory_group_present:
+  module_and_function: user.primary_group
+  args:
+    - '{{ name }}'
+  assertion: assertEqual
+  expected-return: '{{ user_group }}'
+
 
 
 {%-   endif %}

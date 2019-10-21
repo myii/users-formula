@@ -114,9 +114,9 @@ users_{{ name }}_user:
     {%- elif 'uid' in user %}
     - gid: {{ user['uid'] }}
     {%- endif %}
-    {% if 'system' in user and user['system'] %}
+    {%- if 'system' in user and user['system'] %}
     - system: True
-    {% endif %}
+    {%- endif %}
   user.present:
     - name: {{ name }}
     - home: {{ home }}
