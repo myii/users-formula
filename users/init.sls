@@ -96,7 +96,7 @@ users_{{ name }}_user_prereq:
 {%-     endif %}
 
 users_{{ name }}_user:
-  {%- if createhome %}
+  {%-   if createhome %}
   file.directory:
     - name: {{ home }}
     - user: {{ user.get('homedir_owner', name) }}
@@ -106,7 +106,7 @@ users_{{ name }}_user:
     - require:
       - user: users_{{ name }}_user
       - group: {{ user_group }}
-  {%- endif %}
+  {%-   endif %}
   group.present:
     - name: {{ user_group }}
     {%- if 'prime_group' in user and 'gid' in user['prime_group'] %}
@@ -121,92 +121,90 @@ users_{{ name }}_user:
     - name: {{ name }}
     - home: {{ home }}
     - shell: {{ user.get('shell', current.get('shell', users.get('shell', '/bin/bash'))) }}
-    {% if 'uid' in user -%}
+    {%- if 'uid' in user %}
     - uid: {{ user['uid'] }}
-    {% endif -%}
-    {% if 'password' in user -%}
+    {%- endif %}
+    {%- if 'password' in user %}
     - password: '{{ user['password'] }}'
-    {% endif -%}
-    {% if user.get('empty_password') -%}
+    {%- endif %}
+    {%- if user.get('empty_password') %}
     - empty_password: {{ user.get('empty_password') }}
-    {% endif -%}
-    {% if 'enforce_password' in user -%}
+    {%- endif %}
+    {%- if 'enforce_password' in user %}
     - enforce_password: {{ user['enforce_password'] }}
-    {% endif -%}
-    {% if 'hash_password' in user -%}
+    {%- endif %}
+    {%- if 'hash_password' in user %}
     - hash_password: {{ user['hash_password'] }}
-    {% endif -%}
-    {% if user.get('system', False) -%}
+    {%- endif %}
+    {%- if user.get('system', False) %}
     - system: True
-    {% endif -%}
-    {% if 'prime_group' in user and 'gid' in user['prime_group'] -%}
+    {%- endif %}
+    {%- if 'prime_group' in user and 'gid' in user['prime_group'] %}
     - gid: {{ user['prime_group']['gid'] }}
-    {% elif 'prime_group' in user and 'name' in user['prime_group'] %}
+    {%- elif 'prime_group' in user and 'name' in user['prime_group'] %}
     - gid: {{ user['prime_group']['name'] }}
-    {% else -%}
+    {%- else %}
     - gid: {{ name }}
-    {% endif -%}
-    {% if 'fullname' in user %}
+    {%- endif %}
+    {%- if 'fullname' in user %}
     - fullname: {{ user['fullname'] }}
-    {% endif -%}
-    {% if 'roomnumber' in user %}
+    {%- endif %}
+    {%- if 'roomnumber' in user %}
     - roomnumber: {{ user['roomnumber'] }}
-    {% endif %}
-    {% if 'workphone' in user %}
+    {%- endif %}
+    {%- if 'workphone' in user %}
     - workphone: {{ user['workphone'] }}
-    {% endif %}
-    {% if 'homephone' in user %}
+    {%- endif %}
+    {%- if 'homephone' in user %}
     - homephone: {{ user['homephone'] }}
-    {% endif %}
+    {%- endif %}
     - createhome: {{ createhome }}
-    {% if not user.get('unique', True) %}
+    {%- if not user.get('unique', True) %}
     - unique: False
-    {% endif %}
+    {%- endif %}
     {%- if grains['saltversioninfo'] >= [2018, 3, 1] %}
     - allow_gid_change: {{ users.allow_gid_change if 'allow_gid_change' not in user else user['allow_gid_change'] }}
     {%- endif %}
-    {% if 'expire' in user -%}
-        {% if grains['kernel'].endswith('BSD') and
-            user['expire'] < 157766400 %}
-        {# 157762800s since epoch equals 01 Jan 1975 00:00:00 UTC #}
+    {%- if 'expire' in user %}
+    {%-   if grains['kernel'].endswith('BSD') and user['expire'] < 157766400 %}
+    {#-   157762800s since epoch equals 01 Jan 1975 00:00:00 UTC #}
     - expire: {{ user['expire'] * 86400 }}
-        {% elif grains['kernel'] == 'Linux' and
-            user['expire'] > 84006 %}
-        {# 2932896 days since epoch equals 9999-12-31 #}
+    {%-   elif grains['kernel'] == 'Linux' and user['expire'] > 84006 %}
+    {#-   2932896 days since epoch equals 9999-12-31 #}
     - expire: {{ (user['expire'] / 86400) | int }}
-        {% else %}
+    {%-   else %}
     - expire: {{ user['expire'] }}
-        {% endif %}
-    {% endif -%}
-    {% if 'mindays' in user %}
+    {%-   endif %}
+    {%- endif %}
+    {%- if 'mindays' in user %}
     - mindays: {{ user.get('mindays', None) }}
-    {% endif %}
-    {% if 'maxdays' in user %}
+    {%- endif %}
+    {%- if 'maxdays' in user %}
     - maxdays: {{ user.get('maxdays', None) }}
-    {% endif %}
-    {% if 'inactdays' in user %}
+    {%- endif %}
+    {%- if 'inactdays' in user %}
     - inactdays: {{ user.get('inactdays', None) }}
-    {% endif %}
-    {% if 'warndays' in user %}
+    {%- endif %}
+    {%- if 'warndays' in user %}
     - warndays: {{ user.get('warndays', None) }}
-    {% endif %}
+    {%- endif %}
     - remove_groups: {{ user.get('remove_groups', 'False') }}
     - groups:
       - {{ user_group }}
-      {% for group in user.get('groups', []) -%}
+      {%- for group in user.get('groups', []) %}
       - {{ group }}
-      {% endfor %}
-    {% if 'optional_groups' in user %}
+      {%- endfor %}
+    {%- if 'optional_groups' in user %}
     - optional_groups:
-      {% for optional_group in user['optional_groups'] -%}
+      {%- for optional_group in user['optional_groups'] %}
       - {{ optional_group }}
-      {% endfor %}
-    {% endif %}
+      {%- endfor %}
+    {%- endif %}
     - require:
       - group: {{ user_group }}
-      {% for group in user.get('groups', []) -%}
+      {%- for group in user.get('groups', []) %}
       - group: {{ group }}
-      {% endfor %}
+      {%- endfor %}
 
 
   {% if 'ssh_keys' in user or

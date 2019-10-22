@@ -170,6 +170,30 @@ validate_users_{{ name }}_user_file_directory_group_present:
   assertion: assertEqual
   expected-return: '{{ user_group }}'
 
+{%-     set use_conf = {
+            'shell': user.get('shell',
+                       current.get('shell',
+                         users.get('shell',
+                           '/bin/bash'))),
+            'uid': user.get('uid', ''),
+            'gid': user.get('prime_group', {}).get('gid',
+                     user.get('prime_group', {}).get('name',
+                       '')),
+            'fullname': user.get('fullname', ''),
+            'roomnumber': user.get('roomnumber', ''),
+            'workphone': user.get('workphone', ''),
+            'homephone': user.get('homephone', ''),
+        } %}
+{%-     for conf_key, conf_val in use_conf.items() if conf_val %}
+validate_users_{{ name }}_user_{{ conf_key }}:
+  module_and_function: user.info
+  args:
+    - '{{ name }}'
+  assertion: assertEqual
+  assertion_section: '{{ conf_key }}'
+  expected-return: '{{ conf_val }}'
+{%-     endfor %}
+
 
 
 {%-   endif %}
