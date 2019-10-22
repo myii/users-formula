@@ -194,6 +194,34 @@ validate_users_{{ name }}_user_{{ conf_key }}:
   expected-return: '{{ conf_val }}'
 {%-     endfor %}
 
+{#-     SSH tests #}
+{%-     if 'ssh_keys' in user or
+           'ssh_auth' in user or
+           'ssh_auth_file' in user or
+           'ssh_auth_pillar' in user or
+           'ssh_auth.absent' in user or
+           'ssh_config' in user %}
+{%-       set dir = home ~ '/.ssh' %}
+{%-       set use_conf = {
+              'user': name,
+              'group': user_group,
+              'mode': '0700',
+          } %}
+validate_user_keydir_{{ name }}_file_directory_exists:
+  module_and_function: file.directory_exists
+  args:
+    - '{{ dir }}'
+  assertion: assertTrue
+
+{%-       for conf_key, conf_val in use_conf.items() %}
+validate_user_keydir_{{ name }}_file_directory_{{ conf_key }}:
+  module_and_function: file.get_{{ conf_key }}
+  args:
+    - '{{ dir }}'
+  assertion: assertEqual
+  expected-return: '{{ conf_val }}'
+{%-       endfor %}
+{%-     endif %}
 
 
 {%-   endif %}

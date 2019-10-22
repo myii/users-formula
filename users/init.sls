@@ -207,27 +207,27 @@ users_{{ name }}_user:
       {%- endfor %}
 
 
-  {% if 'ssh_keys' in user or
-      'ssh_auth' in user or
-      'ssh_auth_file' in user or
-      'ssh_auth_pillar' in user or
-      'ssh_auth.absent' in user or
-      'ssh_config' in user %}
+{%-     if 'ssh_keys' in user or
+           'ssh_auth' in user or
+           'ssh_auth_file' in user or
+           'ssh_auth_pillar' in user or
+           'ssh_auth.absent' in user or
+           'ssh_config' in user %}
 user_keydir_{{ name }}:
   file.directory:
     - name: {{ home }}/.ssh
     - user: {{ name }}
     - group: {{ user_group }}
     - makedirs: True
-    - mode: 700
-    - dir_mode: 700
+    - mode: '0700'
+    - dir_mode: '0700'
     - require:
       - user: {{ name }}
       - group: {{ user_group }}
       {%- for group in user.get('groups', []) %}
       - group: {{ group }}
       {%- endfor %}
-  {% endif %}
+{%-     endif %}
 
   {% if 'ssh_keys' in user %}
     {% for _key in user.ssh_keys.keys() %}
