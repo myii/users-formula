@@ -180,6 +180,7 @@ suites:
         base:
           '*':
             - users
+            - users.vimrc
       pillars:
         top.sls:
           base:
@@ -187,6 +188,10 @@ suites:
               - users
       pillars_from_files:
         users.sls: test/salt/pillar/default.sls
+      dependencies:
+        - name: vim
+          repo: git
+          source: https://github.com/saltstack-formulas/vim-formula.git
     verifier:
       inspec_tests:
         - path: test/integration/default

@@ -52,7 +52,7 @@ users:
     roomnumber: "A-1"
     workphone: "(555) 555-5555"
     homephone: "(555) 555-5551"
-    manage_vimrc: false
+    manage_vimrc: true
     allow_gid_change: false
     manage_bashrc: false
     manage_profile: false
