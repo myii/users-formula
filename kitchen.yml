@@ -179,7 +179,6 @@ suites:
       state_top:
         base:
           '*':
-            - users
             - users.vimrc
       pillars:
         top.sls:
