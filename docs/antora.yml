@@ -1,0 +1,11 @@
+---
+name: 'users-formula'
+title: 'users-formula'
+version: '1.46.0'
+start_page: 'README.adoc'
+nav:
+  - 'modules/ROOT/nav-repo-docs.adoc'
+  - 'modules/ROOT/nav-explanations.adoc'
+  - 'modules/ROOT/nav-guides.adoc'
+  - 'modules/ROOT/nav-references.adoc'
+  - 'modules/ROOT/nav-tutorials.adoc'
